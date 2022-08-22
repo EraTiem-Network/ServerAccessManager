@@ -27,19 +27,19 @@ repositories {
 
 dependencies {
     val kotlinVersion: String by System.getProperties()
-    val spigotApiVersion: String? by project
-    val paperApiVersion: String? by project
-    val bungeeApiVersion: String? by project
-    val velocityApiVersion: String? by project
+    val spigotApiDependency: String? by project
+    val paperApiDependency: String? by project
+    val bungeeApiDependency: String? by project
+    val velocityApiDependency: String? by project
 
     compileOnly(kotlin("stdlib", kotlinVersion))
 
-    if (!spigotApiVersion.isNullOrBlank()) compileOnly("org.spigotmc", "spigot-api", spigotApiVersion)
-    if (!paperApiVersion.isNullOrBlank()) compileOnly("io.papermc.paper", "paper-api", paperApiVersion)
-    if (!bungeeApiVersion.isNullOrBlank()) compileOnly("net.md-5", "bungeecord-api", bungeeApiVersion)
-    if (!velocityApiVersion.isNullOrBlank()) {
-        compileOnly("com.velocitypowered", "velocity-api", velocityApiVersion)
-        kapt("com.velocitypowered", "velocity-api", velocityApiVersion)
+    if (!spigotApiDependency.isNullOrBlank()) compileOnly("org.spigotmc", "spigot-api", spigotApiDependency)
+    if (!paperApiDependency.isNullOrBlank()) compileOnly("io.papermc.paper", "paper-api", paperApiDependency)
+    if (!bungeeApiDependency.isNullOrBlank()) compileOnly("net.md-5", "bungeecord-api", bungeeApiDependency)
+    if (!velocityApiDependency.isNullOrBlank()) {
+        compileOnly("com.velocitypowered", "velocity-api", velocityApiDependency)
+        kapt("com.velocitypowered", "velocity-api", velocityApiDependency)
     }
 }
 
@@ -51,8 +51,6 @@ tasks {
         outputs.upToDateWhen { false }
 
         val mainClass = "${project.group}.${project.name.toLowerCase()}.${project.properties["mainClass"]}"
-        val apiVersion =
-            "(\\d+\\.\\d+){1}(\\.\\d+)?".toRegex().find(project.properties["paperApiVersion"] as String)!!.value
         val pluginDescription: String by project
         val pluginDependencies = getAsYamlList(project.properties["pluginDependencies"])
         val pluginSoftDependencies = getAsYamlList(project.properties["pluginSoftdependencies"])
@@ -63,13 +61,15 @@ tasks {
             "plugin_description" to pluginDescription,
             "plugin_version" to version.toString(),
             "plugin_main_class" to mainClass,
-            "plugin_api_version" to apiVersion,
             "plugin_dependencies" to pluginDependencies,
             "plugin_softdependencies" to pluginSoftDependencies,
             "plugin_authors" to authors
         )
 
         filesMatching(setOf("plugin.yml", "bungee.yml")) {
+            val api = if (this.sourceName.contains("plugin")) "pluginApiVersion" else "bungeeApiVersion"
+            props["plugin_api_version"] = (project.properties[api] as String?) ?: ""
+
             expand(props)
         }
     }
