@@ -1,1 +1,1 @@
-rootProject.name = "Kotlin-Plugin-Template"
+rootProject.name = "ServerAccessManager"
