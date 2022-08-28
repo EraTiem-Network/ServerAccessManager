@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "net.eratiem"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     maven {
@@ -31,6 +31,8 @@ dependencies {
     val paperApiDependency: String? by project
     val bungeeApiDependency: String? by project
     val velocityApiDependency: String? by project
+    val luckpermsApi: String by project
+    val eralogger: String by project
 
     compileOnly(kotlin("stdlib", kotlinVersion))
 
@@ -41,20 +43,23 @@ dependencies {
         compileOnly("com.velocitypowered", "velocity-api", velocityApiDependency)
         kapt("com.velocitypowered", "velocity-api", velocityApiDependency)
     }
+    compileOnly("net.luckperms", "api", luckpermsApi)
+    compileOnly("net.eratiem", "eralogger", eralogger)
 }
 
 val jarTasks: MutableSet<TaskProvider<ShadowJar>> = mutableSetOf()
 
+
 tasks {
+
     // Write Properties into plugin.yml
     withType<Copy> {
         outputs.upToDateWhen { false }
-
-        val mainClass = "${project.group}.${project.name.toLowerCase()}.${project.properties["mainClass"]}"
         val pluginDescription: String by project
         val pluginDependencies = getAsYamlList(project.properties["pluginDependencies"])
         val pluginSoftDependencies = getAsYamlList(project.properties["pluginSoftdependencies"])
         val authors: String = getAsYamlList(project.properties["authors"])
+        val mainClass = "${project.group}.${project.name.toLowerCase()}.${project.properties["mainClass"]}"
 
         val props: LinkedHashMap<String, String> = linkedMapOf(
             "plugin_name" to project.name,
@@ -66,7 +71,7 @@ tasks {
             "plugin_authors" to authors
         )
 
-        filesMatching(setOf("plugin.yml", "bungee.yml")) {
+        filesMatching(setOf("plugin.yml", "bungee.yml", "$mainClass.kt")) {
             val api = if (this.sourceName.contains("plugin")) "pluginApiVersion" else "bungeeApiVersion"
             props["plugin_api_version"] = (project.properties[api] as String?) ?: ""
 
