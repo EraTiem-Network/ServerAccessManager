@@ -7,12 +7,8 @@ interface PermissionChecker {
     val luckPerms: LuckPerms
 
     fun isUserAllowedToConnectToServer(uuid: UUID, serverName: String): Boolean {
-        var isAllowed = false
-
-        luckPerms.userManager.loadUser(uuid).thenAccept { user ->
-            isAllowed = user.cachedData.permissionData.checkPermission("sam.${serverName.lowercase()}").asBoolean()
+        luckPerms.userManager.loadUser(uuid).join().let { user ->
+            return user.cachedData.permissionData.checkPermission("sam.${serverName.lowercase()}").asBoolean()
         }
-
-        return isAllowed
     }
 }
