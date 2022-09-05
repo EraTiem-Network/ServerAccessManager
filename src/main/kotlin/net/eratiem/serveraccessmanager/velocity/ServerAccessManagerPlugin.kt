@@ -9,7 +9,10 @@ import com.velocitypowered.api.plugin.Dependency
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
 import net.eratiem.eralogger.tools.EraLogger
+import net.eratiem.serveraccessmanager.tools.PREFIX
 import net.eratiem.serveraccessmanager.tools.PermissionChecker
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
 import org.slf4j.Logger
@@ -52,11 +55,19 @@ class ServerAccessManagerPlugin @Inject constructor(
     private class ServerAccessListener(
         override val luckPerms: LuckPerms = LuckPermsProvider.get()
     ) : PermissionChecker {
+        private val notAllowedMsg: Component =
+            Component.text("You are not allowed to join this server!", NamedTextColor.RED)
 
         @Subscribe
         fun onServerAccess(event: ServerPreConnectEvent) {
             if (!isUserAllowedToConnectToServer(event.player.uniqueId, event.result.server.get().serverInfo.name)) {
                 event.result = ServerResult.denied()
+
+                if (!event.result.server.isPresent) {
+                    event.player.disconnect(notAllowedMsg)
+                } else {
+                    event.player.sendMessage(Component.text("[$PREFIX] ").append(notAllowedMsg))
+                }
             }
         }
     }
