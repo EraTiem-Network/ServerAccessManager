@@ -63,7 +63,7 @@ class ServerAccessManagerPlugin @Inject constructor(
             if (!isUserAllowedToConnectToServer(event.player.uniqueId, event.result.server.get().serverInfo.name)) {
                 event.result = ServerResult.denied()
 
-                if (!event.result.server.isPresent) {
+                if (!event.player.currentServer.isPresent) {
                     event.player.disconnect(notAllowedMsg)
                 } else {
                     event.player.sendMessage(Component.text("[$PREFIX] ").append(notAllowedMsg))
