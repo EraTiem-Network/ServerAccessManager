@@ -1,3 +1,3 @@
 package net.eratiem.serveraccessmanager.tools
 
-val PREFIX: String = "ServerAccessManager"
+val PREFIX: String = "SAM"
