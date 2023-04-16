@@ -1,7 +1,5 @@
-package net.eratiem.serveraccessmanager.bungee
+package net.eratiem.serveraccessmanager
 
-import net.eratiem.serveraccessmanager.tools.PREFIX
-import net.eratiem.serveraccessmanager.tools.PermissionChecker
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
 import net.md_5.bungee.api.ChatColor
