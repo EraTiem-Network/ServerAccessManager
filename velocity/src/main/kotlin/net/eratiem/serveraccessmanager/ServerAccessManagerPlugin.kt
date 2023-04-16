@@ -1,4 +1,4 @@
-package net.eratiem.serveraccessmanager.velocity
+package net.eratiem.serveraccessmanager
 
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
@@ -9,8 +9,6 @@ import com.velocitypowered.api.plugin.Dependency
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
 import net.eratiem.eralogger.tools.EraLogger
-import net.eratiem.serveraccessmanager.tools.PREFIX
-import net.eratiem.serveraccessmanager.tools.PermissionChecker
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.luckperms.api.LuckPerms

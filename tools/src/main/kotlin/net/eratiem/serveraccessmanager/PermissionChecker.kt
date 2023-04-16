@@ -1,4 +1,4 @@
-package net.eratiem.serveraccessmanager.tools
+package net.eratiem.serveraccessmanager
 
 import net.luckperms.api.LuckPerms
 import java.util.*
