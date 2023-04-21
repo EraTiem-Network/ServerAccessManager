@@ -8,65 +8,47 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Dependency
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
-import net.eratiem.eralogger.tools.EraLogger
+import net.eratiem.eralogger.addToEraLogger
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.luckperms.api.LuckPerms
-import net.luckperms.api.LuckPermsProvider
-import org.slf4j.Logger
+import net.kyori.adventure.text.format.NamedTextColor.RED
+import java.util.logging.Logger
 import javax.inject.Inject
 
 @Plugin(
-    id = "serveraccessmanager",
-    name = "ServerAccessManager",
-    version = "1.0.0",
-    description = "Restricts Server-Access",
-    authors = ["Motzkiste"],
-    dependencies = [Dependency(id = "kotlinprovider"), Dependency(id = "eralogger"), Dependency(id = "luckperms")]
+  id = "serveraccessmanager",
+  name = "ServerAccessManager",
+  version = "1.0.0.alpha1",
+  description = "Restricts Server-Access",
+  authors = ["Motzkiste"],
+  dependencies = [Dependency(id = "kotlinprovider"), Dependency(id = "eralogger"), Dependency(id = "luckperms")]
 )
 class ServerAccessManagerPlugin @Inject constructor(
-    private val proxy: ProxyServer,
-    name: String,
-    logger: Logger
+  private val proxy: ProxyServer,
+  private val logger: Logger
 ) {
-    private lateinit var serverAccessListener: ServerAccessListener
-    private val logger = EraLogger.getInstance(name, logger)
 
-    init {
-        logger.info(name)
+  @Subscribe
+  fun onInitialize(event: ProxyInitializeEvent) {
+    logger.addToEraLogger()
+    proxy.eventManager.register(this, ServerPreConnectEvent::class.java) { onServerAccess(it) }
+
+    logger.info("ServerAccessManager enabled!")
+  }
+
+  @Subscribe
+  fun onShutdown(event: ProxyShutdownEvent) {
+    logger.info("ServerAccessManager disabled!")
+  }
+
+  private fun onServerAccess(event: ServerPreConnectEvent) = with(event) {
+    if (!isUserAllowedToConnectToServer(player.uniqueId, result.server.get().serverInfo.name)) {
+      result = ServerResult.denied()
+
+      if (!player.currentServer.isPresent) {
+        player.disconnect(Component.text(NOT_ALLOWED_MSG, RED))
+      } else {
+        player.sendMessage(Component.text("[$PREFIX] ").append(Component.text(NOT_ALLOWED_MSG, RED)))
+      }
     }
-
-    @Subscribe
-    fun onInitialize(event: ProxyInitializeEvent) {
-        serverAccessListener = ServerAccessListener()
-        proxy.eventManager.register(this, serverAccessListener)
-        logger.info("ServerAccessManager enabled!")
-    }
-
-    @Subscribe
-    fun onShutdown(event: ProxyShutdownEvent) {
-        if (this::serverAccessListener.isInitialized)
-            proxy.eventManager.unregisterListener(this, serverAccessListener)
-    }
-
-
-    private class ServerAccessListener(
-        override val luckPerms: LuckPerms = LuckPermsProvider.get()
-    ) : PermissionChecker {
-        private val notAllowedMsg: Component =
-            Component.text("You are not allowed to join this server!", NamedTextColor.RED)
-
-        @Subscribe
-        fun onServerAccess(event: ServerPreConnectEvent) {
-            if (!isUserAllowedToConnectToServer(event.player.uniqueId, event.result.server.get().serverInfo.name)) {
-                event.result = ServerResult.denied()
-
-                if (!event.player.currentServer.isPresent) {
-                    event.player.disconnect(notAllowedMsg)
-                } else {
-                    event.player.sendMessage(Component.text("[$PREFIX] ").append(notAllowedMsg))
-                }
-            }
-        }
-    }
+  }
 }
